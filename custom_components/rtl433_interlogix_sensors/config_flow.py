@@ -25,6 +25,7 @@ class RTL433ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         self._pending: list[str] = []
         self._classified: dict[str, dict[str, str]] = {}
         self._current_serial: str | None = None
+        self._scan_task: asyncio.Task | None = None
 
     async def async_step_user(
         self, user_input: dict | None = None
@@ -51,16 +52,40 @@ class RTL433ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return await self.async_step_scan()
 
     async def async_step_scan(
-        self, _user_input: dict | None = None
+        self, user_input: dict | None = None
     ) -> config_entries.FlowResult:
-        """Scan MQTT for Interlogix sensor broadcasts.
+        """Scan MQTT for Interlogix sensor broadcasts using a progress step.
 
         Args:
-            _user_input: Unused; present for step handler signature compatibility.
+            user_input: Unused; present for step handler signature compatibility.
 
         Returns:
-            A flow result directing to classify or showing an error form.
+            A flow result showing scan progress or directing to classify.
         """
+        if not self._scan_task:
+            self._scan_task = self.hass.async_create_task(self._do_scan())
+
+        if not self._scan_task.done():
+            return self.async_show_progress(
+                step_id="scan",
+                progress_action="scanning",
+                progress_task=self._scan_task,
+            )
+
+        self._scan_task = None
+
+        if not self._discovered:
+            return self.async_show_form(
+                step_id="user",
+                data_schema=vol.Schema({}),
+                errors={"base": "no_devices_found"},
+            )
+
+        self._pending = list(self._discovered.keys())
+        return await self._next_classify_step()
+
+    async def _do_scan(self) -> None:
+        """Run the MQTT scan for the configured duration."""
         discovered: dict[str, str] = {}
 
         @callback
@@ -84,17 +109,7 @@ class RTL433ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
         await asyncio.sleep(_SCAN_DURATION_SECONDS)
         unsubscribe()
-
-        if not discovered:
-            return self.async_show_form(
-                step_id="user",
-                data_schema=vol.Schema({}),
-                errors={"base": "no_devices_found"},
-            )
-
         self._discovered = discovered
-        self._pending = list(discovered.keys())
-        return await self._next_classify_step()
 
     async def _next_classify_step(self) -> config_entries.FlowResult:
         """Advance to the next sensor classification step or finish.
