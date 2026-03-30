@@ -2,12 +2,15 @@
   "config": {
     "step": {
       "user": {
-        "title": "Scan for Interlogix Sensors",
-        "description": "Click Submit, then trigger each sensor within 30 seconds."
+        "title": "RTL433 Sensors",
+        "description": "Choose to keep scanning or finish setup.",
+        "data": {
+          "action": "Action"
+        }
       },
       "scan": {
-        "title": "Scanning...",
-        "description": "Listening for Interlogix sensors on MQTT. Trigger your sensors now."
+        "title": "Waiting for device...",
+        "description": "Trigger a sensor to detect it."
       },
       "classify": {
         "title": "Classify Sensor",
@@ -18,7 +21,7 @@
       }
     },
     "error": {
-      "no_devices_found": "No Interlogix sensors detected. Make sure rtl_433 is running and try triggering a sensor."
+      "no_devices_found": "No sensors classified yet. Trigger a sensor or finish."
     }
   }
 }
