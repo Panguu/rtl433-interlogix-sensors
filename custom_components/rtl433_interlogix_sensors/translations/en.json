@@ -5,6 +5,10 @@
         "title": "Scan for Interlogix Sensors",
         "description": "Click Submit, then trigger each sensor within 30 seconds."
       },
+      "scan": {
+        "title": "Scanning...",
+        "description": "Listening for Interlogix sensors on MQTT. Trigger your sensors now."
+      },
       "classify": {
         "title": "Classify Sensor",
         "description": "Serial: {serial}\nTopic: {topic}\n\nWhat type is this sensor?",

@@ -74,6 +74,7 @@ class RTL433ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_show_progress(
                 step_id="scan",
                 progress_action="scanning",
+                progress_task=self._scan_task,
             )
 
         self._scan_task = None
