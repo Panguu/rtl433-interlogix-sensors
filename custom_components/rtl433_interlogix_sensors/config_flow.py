@@ -64,12 +64,16 @@ class RTL433ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         """
         if not self._scan_task:
             self._scan_task = self.hass.async_create_task(self._do_scan())
+            self._scan_task.add_done_callback(
+                lambda _: self.hass.async_create_task(
+                    self.hass.config_entries.flow.async_configure(self.flow_id)
+                )
+            )
 
         if not self._scan_task.done():
             return self.async_show_progress(
                 step_id="scan",
                 progress_action="scanning",
-                progress_task=self._scan_task,
             )
 
         self._scan_task = None
