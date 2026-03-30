@@ -1,4 +1,4 @@
-DOMAIN = "rtl433_sensors"
+DOMAIN = "rtl433_interlogix_sensors"
 
 SENSOR_TYPES = {
     "door": "Door",
