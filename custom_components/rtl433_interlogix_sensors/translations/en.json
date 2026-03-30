@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Scan for Interlogix Sensors",
+        "description": "Click Submit, then trigger each sensor within 30 seconds."
+      },
+      "classify": {
+        "title": "Classify Sensor",
+        "description": "Serial: {serial}\nTopic: {topic}\n\nWhat type is this sensor?",
+        "data": {
+          "sensor_type": "Sensor type"
+        }
+      }
+    },
+    "error": {
+      "no_devices_found": "No Interlogix sensors detected. Make sure rtl_433 is running and try triggering a sensor."
+    }
+  }
+}
