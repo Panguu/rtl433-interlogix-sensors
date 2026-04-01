@@ -54,6 +54,8 @@ async def async_setup_entry(
         InterlogixAlarmSensor(device_id, name, device_info),
         InterlogixSupervisionSensor(device_id, name, device_info),
         InterlogixBatterySensor(device_id, name, device_info),
+        # Diagnostic switch entities (switch1–switch5)
+        *[InterlogixSwitchSensor(device_id, name, f"switch{i}", device_info) for i in range(1, 6)],
     ]
 
     async_add_entities(entities)
@@ -194,6 +196,33 @@ class InterlogixSupervisionSensor(InterlogixBaseSensor):
         if payload.get("subtype") != "supervision":
             return
         self._update(True)
+
+
+class InterlogixSwitchSensor(InterlogixBaseSensor):
+    """Diagnostic sensor showing raw state of a single switch (switch1–switch5)."""
+
+    _attr_entity_registry_enabled_default = False  # hidden by default, enable manually
+
+    def __init__(
+        self,
+        device_id: str,
+        device_name: str,
+        switch: str,
+        device_info: DeviceInfo,
+    ) -> None:
+        super().__init__(device_id, device_name, device_info)
+        self._switch = switch
+        self._attr_name = f"Switch {switch[-1]}"
+        self._attr_unique_id = f"{device_id}_{switch}"
+
+    def handle_message(self, payload: dict) -> None:
+        # Only update on contact packets — that's where switch states are meaningful
+        if payload.get("subtype") != "contact":
+            return
+        value = payload.get(self._switch)
+        if value is None:
+            return
+        self._update(value == "OPEN")
 
 
 class InterlogixBatterySensor(InterlogixBaseSensor):
